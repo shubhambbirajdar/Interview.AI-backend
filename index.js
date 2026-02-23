@@ -24,6 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', routes);
 app.use('/', routes); // Support root level endpoints for backward compatibility
 
+// Lightweight liveness endpoint (no validation)
+app.get('/is-live', (req, res) => {
+    res.status(200).send('success web is active');
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
