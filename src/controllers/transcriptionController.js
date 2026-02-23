@@ -7,6 +7,7 @@ const Transcription = require('../models/Transcription');
 
 // Transcribe audio and evaluate answer
 exports.transcribeAudio = async (req, res) => {
+   // consoleq
     const audioData = req.body.audio;
     const question = req.body.question;
     let interviewId = req.body.interviewId;
@@ -19,7 +20,7 @@ exports.transcribeAudio = async (req, res) => {
     if (!interviewId) {
         try {
             const newInterview = new Interview({
-                userId: req.user._id,
+                userId: req.body.userId,
                 questions: [],
                 status: 'in-progress'
             });
@@ -38,7 +39,7 @@ exports.transcribeAudio = async (req, res) => {
             if (!existingInterview) {
                 return res.status(404).json({ error: 'Interview not found' });
             }
-            if (existingInterview.userId.toString() !== req.user._id.toString()) {
+            if (existingInterview.userId.toString() !== req.body.userId.toString()) {
                 return res.status(403).json({ error: 'Not authorized to access this interview' });
             }
         } catch (error) {
@@ -113,7 +114,8 @@ exports.transcribeAudio = async (req, res) => {
                     experience,
                     difficultyLevel,
                     subject,
-                    technology
+                    technology,
+                    interviewId
                 });
 
                 // Update interview with answer and score
@@ -162,7 +164,7 @@ exports.transcribeAudio = async (req, res) => {
 
 // Evaluate answer using AI
 const getEvaluation = async (data) => {
-    const { question, answer, experience, difficultyLevel, subject, technology } = data;
+    const { question, answer, experience, difficultyLevel, subject, technology, interviewId } = data;
     
     const prompt = `Role: You are an expert technical interviewer and evaluator specializing in ${subject} and ${technology}.
 
@@ -212,7 +214,7 @@ Evaluate now and return JSON:`;
 
     try {
         const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-            model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+            model: 'google/gemma-3-12b-it:free',
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -264,7 +266,8 @@ Evaluate now and return JSON:`;
             experience: experience,
             difficultyLevel: difficultyLevel,
             subject: subject,
-            technology: technology
+            technology: technology,
+            interviewId:interviewId
         };
     } catch (error) {
         console.error('Error during evaluation:', error.response ? error.response.data : error.message);

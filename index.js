@@ -1,12 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const dns = require("node:dns/promises");
 require('dotenv').config();
 
 const connectDB = require('./src/config/database');
 const routes = require('./src/routes');
 const { PORT } = require('./src/config/constants');
 
+dns.setServers(["1.1.1.1"]);
 const app = express();
 
 // Connect to MongoDB
@@ -30,12 +32,12 @@ app.get('/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ 
-        error: 'Something went wrong!', 
-        details: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    res.status(500).json({
+        error: 'Something went wrong!',
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+    console.log(`Server is running on http://0.0.0.0:${PORT}`);
 });

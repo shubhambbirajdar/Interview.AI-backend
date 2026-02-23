@@ -1,14 +1,6 @@
 const Question = require('../models/Question');
 const axios = require('axios');
-const https = require('https');
-const { HUGGINGFACE_API_KEY, HUGGINGFACE_API_URL } = require('../config/constants');
-
-// Create axios instance with SSL certificate verification disabled
-const axiosInstance = axios.create({
-    httpsAgent: new https.Agent({  
-        rejectUnauthorized: false
-    })
-});
+const { OPENROUTER_API_KEY, OPENROUTER_API_URL } = require('../config/constants');
 
 // Get all questions
 exports.getAllQuestions = async (req, res) => {
@@ -137,26 +129,33 @@ IMPORTANT: Return ONLY a valid JSON array in this EXACT format (no markdown, no 
 
 Generate the JSON array now:`;
 
-        const response = await axiosInstance.post(
-            `${HUGGINGFACE_API_URL}mistralai/Mistral-7B-Instruct-v0.3`,
+        const response = await axios.post(
+            OPENROUTER_API_URL,
             { 
-                inputs: prompt,
-                parameters: {
-                    max_new_tokens: 2000,
-                    temperature: 0.7,
-                    top_p: 0.9,
-                    return_full_text: false
-                }
+                model: 'mistralai/mistral-7b-instruct',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are an expert technical interviewer. Return ONLY a valid JSON array in the specified format, no markdown, no code blocks, no additional text.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                top_p: 0.9,
+                max_tokens: 2000
             },
             {
                 headers: {
-                    'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
+                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                     'Content-Type': 'application/json',
                 },
             }
         );
 
-        let generatedText = response.data[0]?.generated_text || '';
+        let generatedText = response.data.choices[0]?.message?.content || '';
         
         // Clean up the response - remove markdown code blocks if present
         generatedText = generatedText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
