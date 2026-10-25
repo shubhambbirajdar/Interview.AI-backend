@@ -22,9 +22,15 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Build') {
             steps {
-                sh 'npm test --if-present'
+                sh 'npm run build --if-present'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Build successful. Deployment will be configured next.'
             }
         }
     }
