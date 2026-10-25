@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -30,9 +29,22 @@ pipeline {
             }
         }
 
+        stage('Stage Deployment Files') {
+            steps {
+                sh '''
+                    rsync -a --delete \
+                      --exclude='.git/' \
+                      --exclude='.env' \
+                      --exclude='.envnano' \
+                      --exclude='node_modules/' \
+                      ./ /srv/interview-ai-backend-deploy/
+                '''
+            }
+        }
+
         stage('Deploy') {
             steps {
-                echo 'Validation passed. PM2 deployment will be configured next.'
+                sh 'sudo /usr/local/bin/deploy-interview-ai-backend'
             }
         }
     }
