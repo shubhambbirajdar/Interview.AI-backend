@@ -22,15 +22,17 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Validate Application') {
             steps {
-                sh 'npm run build --if-present'
+                sh 'test -f index.js'
+                sh 'node --check index.js'
+                echo 'Basic application checks passed.'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Build successful. Deployment will be configured next.'
+                echo 'Validation passed. PM2 deployment will be configured next.'
             }
         }
     }
