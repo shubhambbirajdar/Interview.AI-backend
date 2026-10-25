@@ -29,9 +29,6 @@ logs/
 Thumbs.db
 *.sublime-workspace
 
-# Dependencies
-package-lock.json
-yarn.lock
 
 # Testing
 coverage/
